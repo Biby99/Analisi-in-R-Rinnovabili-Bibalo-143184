@@ -1,0 +1,570 @@
+---
+title: "Uno sguardo alle energie rinnovabili nel mondo"
+author: "Simone Bibalo"
+date: "6/1/2022"
+output:
+  ioslides_presentation:
+    widescreen : true
+    smaller : true
+    css: style.css
+    incremental: yes
+  html_document:
+    df_print: inline
+
+
+---
+
+
+```{r setup, include = FALSE}
+knitr :: opts_chunk$set(echo = FALSE, cache = TRUE, message = FALSE, warning = FALSE)
+```
+## Di rinnovabili si parla tanto ma...
+Si sente ogni giorno parlare di energie rinnovabili e sostenibili, ma questa transizione sta realmente avvenendo?
+In questa analisi ho preso in considerazione i dati di produzione di energia mondiale per paese nel periodo 2015-2019 per capire se qualche cambiamento vi è effettivamente stato.
+
+#### Precisazioni importanti<br>
+Rinnovabile NON vuol dire sostenibile.<br><br>
+Rinnovabile significa che non si basa su delle scorte che possono esaurire, tuttavia in questa analisi ho deciso di inserire in questa categoria anche quelle che non lo sono per definizione teorica, ma fanno parte comunque di un possibile futuro senza combustibili fossili, come ad esempio il nucleare.<br>
+Inoltre non viene considerata la differenza tra on-grid e off-grid, cioè viene conteggiata la produzione di energia anche non direttamente collegata alla rete
+<br> Ecco la lista delle tecnologie in analisi: <br>
+- <b>Solare fotovoltaico</b><br>
+- <b>Concetrazione solare per pompe di calore	</b><br>
+- <b>Eolico on/off-shore</b><br>
+- <b>Idroelettrico</b><br>
+- <b>Impianti idrici e depositi di pompaggio (usati come batteria)</b><br>
+- <b>Geotermico</b><br>
+- <b>Energia marina</b><br>
+- <b>Bio combustibili solidi e liquidi</b><br>
+- <b>Biogas</b><br>
+- <b>Energia da termovalorizzatori</b><br>
+- <b>Nucleare</b><br>
+
+
+```{r include=FALSE}
+library(ggplot2)
+library(dplyr)
+library(plotly)
+library(viridis)
+library(treemap)
+library(scales)
+ 
+```
+
+```{r include=FALSE}
+#Lettura Renewable.csv con successiva select per eliminare la colonna Grid che indica se l'impianto è collegato alla rete o isolato che in questo caso di macro studio non è importante Dataframe gruppato per paese tecnologia anno e sommando l'elettricita prodotta delle righe uguali che prima differivano solo dalla colonna Grid e dall'elettricita prodotta
+getwd()
+
+ele<-read.csv("Renewable.csv", header=TRUE,sep=";")
+ele<-ele %>% 
+  select(Country,Technology,Year,Electricity)%>%
+  group_by(Country,Technology,Year) %>%
+  summarise(Electricity = sum(Electricity))%>%
+  arrange(desc(Year),.by_group = T) 
+ele$Country[ele$Country == "United Kingdom of Great Britain and Northern Ireland"] = "United Kingdom"
+```
+
+```{r include=FALSE}
+#Creazione array per identificare rinnovabili
+
+Renewable=c("On-grid Solar photovoltaic",
+"Off-grid Solar photovoltaic",
+"Concentrated solar power",	
+"Onshore wind energy",
+"Offshore wind energy",
+"Renewable hydropower",
+"Mixed Hydro Plants",
+"Geothermal energy",
+"Marine energy",
+"Pumped storage",
+"Solid biofuels",
+"Liquid biofuels",
+"Biogas",
+"Renewable municipal waste",	
+"Nuclear"
+)
+NonRenewable=c("Fossil fuels","Other non-renewable energy")
+```
+
+
+
+```{r include=FALSE}
+#Selezione per anno 2019
+#creazione di due dataframe uno per rinnovabili e uno per le non rinnovabili in modo da ottenere facilmente i totali
+#Inner join dei due data frame con aggiunta di colonne per ottenere la percentuale di rinnovabili e ordinamento in base ad essa
+#ulteriore dataframe per filtrare i paesi piu piccoli volendo
+
+
+ele2019<-ele %>%
+  filter(Year == "2019") %>%
+  filter( any(Technology==NonRenewable)) 
+ele2019<-aggregate(Electricity ~ Country, data = ele2019, FUN = sum)
+colnames(ele2019)[2] <- "ElectricityNotRenewable"
+
+
+ele2019<-inner_join(ele2019, aggregate(Electricity ~ Country, data =ele %>%
+  filter(Year == "2019") %>%
+  filter( any(Technology==Renewable)) , FUN = sum))
+colnames(ele2019)[3] <- "ElectricityRenewable"
+
+ele2019<-mutate(
+  ele2019,
+  ElectricityTotal = ElectricityRenewable + ElectricityNotRenewable,
+  ElectricityRenewablePercent = round((ElectricityRenewable/ElectricityTotal)*100, 2),
+  ElectricityNotRenewablePercent = round((ElectricityNotRenewable/ElectricityTotal)*100, 2)
+)
+#bigele2019<-ele2019 %>% filter(ElectricityTotal>100000.000)%>% arrange(desc(ElectricityRenewablePercent))
+```
+
+```{r include=FALSE}
+#Selezione per anno 2015
+#creazione di due dataframe uno per rinnovabili e uno per le non rinnovabili in modo da ottenere facilmente i totali
+#Inner join dei due data frame con aggiunta di colonne per ottenere la percentuale di rinnovabili e ordinamento in base ad essa
+#ulteriore dataframe per filtrare i paesi piu piccoli volendo
+ele2015<-ele %>%
+  filter(Year == "2015") %>%
+  filter( any(Technology==NonRenewable)) 
+ele2015<-aggregate(Electricity ~ Country, data = ele2015, FUN = sum)
+colnames(ele2015)[2] <- "ElectricityNotRenewable"
+
+
+ele2015<-inner_join(ele2015, aggregate(Electricity ~ Country, data =ele %>%
+  filter(Year == "2015") %>%
+  filter( any(Technology==Renewable)) , FUN = sum))
+colnames(ele2015)[3] <- "ElectricityRenewable"
+
+ele2015<-mutate(
+  ele2015,
+  ElectricityTotal = ElectricityRenewable + ElectricityNotRenewable,
+  ElectricityRenewablePercent = round((ElectricityRenewable/ElectricityTotal)*100, 2),
+  ElectricityNotRenewablePercent = round((ElectricityNotRenewable/ElectricityTotal)*100, 2)
+)
+#bigele2015<-ele2015 %>% filter(ElectricityTotal>100000.000)%>% arrange(desc(ElectricityRenewablePercent))
+```
+
+## La situazione attuale
+Nella mappa con la percentuale di rinnovabili saltano subito all'occhio il Brasile, la Norvegia, la Svezia e il Canada, queste alte percentuali sono dovute allo sfruttamento dell'energia idroelettrica.<br>
+I altri paesi con un'alta percentuale hanno valori di produzione totale bassa quindi non pesano molto, infatti nella seconda mappa hanno poco valore.<br>
+```{r include=FALSE}
+
+
+df <- read.csv('https://raw.githubusercontent.com/plotly/datasets/master/2014_world_gdp_with_codes.csv')
+
+df$COUNTRY[df$COUNTRY == "United States"] = "United States of America"
+df$COUNTRY[df$COUNTRY == "Russia"] = "Russian Federation"
+df$COUNTRY[df$COUNTRY == "Bolivia"] = "Bolivia (Plurinational State of)"
+df$COUNTRY[df$COUNTRY == "Tanzania"] = "United Republic of Tanzania"
+df$COUNTRY[df$COUNTRY == "Cote d'Ivoire"] = "Côte d'Ivoire"
+df$COUNTRY[df$COUNTRY == "Venezuela"] = "Venezuela (Bolivarian Republic of)"
+df$COUNTRY[df$COUNTRY == "Iran"] = "Iran (Islamic Republic of)"
+df$COUNTRY[df$COUNTRY == "Laos"] = "Lao People's Democratic Republic"
+df$COUNTRY[df$COUNTRY == "Vietnam"] = "Viet Nam"
+df$COUNTRY[df$COUNTRY == "Falkland Islands"] = "Falkland Islands (Malvinas)"
+df$COUNTRY[df$COUNTRY == "Taiwan"] = "Chinese Taipei"
+df$COUNTRY[df$COUNTRY == "Kosovo"] = "Kosovo*"
+df$COUNTRY[df$COUNTRY == "Czech Republic"] = "Czechia"
+df$COUNTRY[df$COUNTRY == "Moldova"] = "Republic of Moldova"
+df$COUNTRY[df$COUNTRY == "Syria"] = "Syrian Arab Republic"
+df$COUNTRY[df$COUNTRY == "Burma"] = "Myanmar"
+df$COUNTRY[df$COUNTRY == "Brunei"] = "Brunei Darussalam"
+df$COUNTRY[df$COUNTRY == "Korea, South"] = "Republic of Korea"
+df$COUNTRY[df$COUNTRY == "Korea, North"] = "Democratic People's Republic of Korea"
+df$COUNTRY[df$COUNTRY == "Gambia, The"] = "Gambia"
+df$COUNTRY[df$COUNTRY == "Congo, Democratic Republic of the"] = "Democratic Republic of the Congo"
+df$COUNTRY[df$COUNTRY == "Congo, Republic of the"] = "Congo"
+df$COUNTRY[df$COUNTRY == "Macedonia"] = "Republic of North Macedonia"
+df$COUNTRY[df$COUNTRY == "Kosovo"] = "Kosovo*"
+
+
+
+
+```
+
+
+```{r include=FALSE}
+# light grey boundaries
+
+l <- list(color = toRGB("grey"), width = 0.5)
+colnames(df)[1] <- "Country"
+df<-right_join(df,ele2019,by = "Country")
+# specify map projection/options
+```
+
+```{r echo=FALSE}
+g <- list(  projection = list(type = 'Mercator'))
+
+fig <- plot_geo(df)
+
+fig <- fig %>% add_trace(
+
+    z = ~ElectricityRenewablePercent, color = ~ElectricityRenewablePercent,colors='Greens',
+
+    text = ~Country, locations = ~CODE, marker = list(line = l)
+
+  )
+
+fig <- fig %>% colorbar(title = 'ElectricityRenewablePercent', ticksuffix = '%')
+
+fig <- fig %>% layout(
+    title = 'ElectricityRenewablePercent in 2019',
+    geo = g
+  )
+
+
+fig
+```
+
+```{r echo=FALSE}
+fig <- plot_geo(df)
+
+fig <- fig %>% add_trace(
+
+    z = ~log(ElectricityTotal), color = ~log(ElectricityTotal), colors = 'Blues',
+
+    text = ~Country, locations = ~CODE, marker = list(line = l)
+
+  )
+
+fig <- fig %>% colorbar(title = 'ElectricityTotal', ticksuffix = 'log')
+
+fig <- fig %>% layout(
+
+    title = 'ElectricityTotal in 2019',
+
+    geo = g
+
+  )
+
+fig
+```
+
+## Quali sono i paesi che non partecipano al cambiamento? 
+
+In questo grafico a bolle si può definire subito chi sono i "big" e chi ha un'alta produzione di energia da rinnovabili.<br>
+Si può notare sia in questo grafico che nelle mappe precedenti che i paesi arabi e nord africani puntano completamente sui combustibili fossili, ma non sono gli unici, in europa per esempio la Polonia sembra non aver interesse nelle rinnovabili.
+
+```{r echo=FALSE}
+fig <- plot_ly(ele2019, x = ~log(ElectricityTotal), y = ~ElectricityRenewablePercent, text = ~Country, type = 'scatter', mode = 'markers', color = ~ElectricityRenewablePercent, colors = 'viridis',
+
+        marker = list(size = ~'^'(log(ElectricityTotal),1.2), opacity = 0.6)
+        )
+
+fig <- fig %>% layout(title = 'Electricity Renewable Percent/Electricity Total per Country in 2019',
+
+         xaxis = list(showgrid = F),
+
+         yaxis = list(showgrid = F))
+
+
+fig
+```
+
+## Quanto pesa il nucleare sulla produzione mondiale? Chi ne fa uso? <br>
+Come si può vedere in questi treemap molti paesi come la Cina hanno scelto di optare per il nucleare, mentre pochi hanno scelto di diminuire la loro produzione, attualmente ricopre il 10% della produzione totale.<br>
+Di questi pochi come ad esempio la germania, l'inizio della chiusura di alcuni stabilimenti ha causato uno scompenso energetico che è stato rimpiazzato sia fonti non rinnnovabili sia dall'acquisto di energia dall'estero, nonostante la causa dell'abbandono fosse proprio quella di passare a energie rinnovabili.<br>
+```{r echo=FALSE}
+treemap(
+   ele %>%
+ filter(Year == "2015" & Technology=="Nuclear" ) ,
+   index="Country",
+   vSize="Electricity",
+   vColor="Electricity",
+   type="value",
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Nucleare 2015",
+   title.legend="Energia prodotta da nucleare",
+ palette="Spectral"
+)
+treemap(
+   ele %>%
+ filter(Year == "2019" & Technology=="Nuclear" ) ,
+   index="Country",
+   vSize="Electricity",
+   vColor="Electricity",
+   type="value",
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Nucleare 2019",
+   title.legend="Energia prodotta da nucleare",
+ palette="Spectral"
+)
+
+```
+
+  
+## Crescita? Se così si può dire...
+In questi treemap viene indicata la crescita delle rinnovabili dal 2015 al 2019.<br>
+Come si può notare la situazione non è cambiata di tanto in proporzione al fenomeno mediatico.<br>
+Nonostante l'aumento di produzione totale di energia generale, la crescita percentuale di rinnovabili soprattutto dei 3 giganti dell'energia resta sotto un misero 10%.<br>
+Si può osservare che i paesi nella fascia di produzione media hanno una crescita bassa dovuta ad una percentuale già alta di rinnovabili (nonostante alcune eccezioni ad esempio la polonia, i paesi arabi e il nord africa).<br>
+
+```{r echo=FALSE}
+#Calcolo crescita dal 2015 al 2019 per trovare paesi che hanno aumentato le fonti rinnovabili
+crescita<-ele2019
+
+
+crescita[,c(2, 3,  5, 6) ]<-crescita[,c(2, 3,  5, 6)  ]-ele2015[,c(2, 3,  5, 6) ]
+
+
+
+treemap(
+   ele2015,
+   index="Country",
+   vSize="ElectricityTotal",
+   vColor="ElectricityRenewablePercent",
+   type="value",
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Percentuale nel 2015 di fonti rinnovabili nel mondo",
+   title.legend="Percentuale da fonti rinnovabili"
+
+)
+treemap(
+   ele2019,
+   index="Country",
+   vSize="ElectricityTotal",
+   vColor="ElectricityRenewablePercent",
+   type="value",
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Percentuale nel 2019 di fonti rinnovabili nel mondo",
+   title.legend="Percentuale da fonti rinnovabili"
+)
+
+treemap(
+   crescita,
+   index="Country",
+   vSize="ElectricityTotal",
+   vColor="ElectricityRenewablePercent",
+   type="value",
+   range=c(-40,40),
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Crescita percentuale di fonti rinnovabili nel mondo",
+   title.legend="Percentuale crescita da fonti rinnovabili"
+)
+
+
+```
+
+## Un quadro generale dei "big"<br>
+
+```{r echo=FALSE}
+big<-c("China","United States of America","India","Russian Federation","Japan","Canada","Brazil","Germany","France","Republic of Korea")
+
+
+
+ggplot(ele %>% filter(Electricity>10000 & Year=="2019" & any(Country==big)), aes(fill=Technology, y=Electricity, x=Country)) + 
+  geom_bar(position='stack', stat='identity')+scale_colour_discrete()+ theme(axis.text.x = element_text(angle = 60, hjust = 1))
+
+
+```
+  
+## Uno sguardo più specifico sulla Cina<br>
+La Cina è in testa alla classifica del 2019 con una produzione di energia totale pari a 7'504'486.752 GW/h con un aumento in confronto al 2015 di 1'693'134.970 GW/h che per fare un confronto è circa la produzione totale dell'india nel 2019.
+Nel futuro si prospetta un aumento dei consumi non solo industriale ma anche della popolazione cinese, con l'avvenuta delle macchine elettriche grazie anche al successo della azienda locale NIO, infatti la Cina ha dichiarato più volte di voler aumentare la produzione in tutti i settori energetici.
+
+
+```{r echo=FALSE}
+#CHINA 
+ele %>%
+  filter(Country == "China"&Year == "2015") %>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>%
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="CHINA 2015", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Reds",
+          fontsize.labels = 10,
+          fontsize.title = 15
+            )
+
+ele %>%
+  filter(Country == "China"&Year == "2019")%>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>% 
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="CHINA 2019", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Reds",
+          fontsize.labels = 10,
+          fontsize.title = 15
+          
+            )
+
+```
+
+
+
+
+## Uno sguardo più specifico sugli USA <br>
+Gli USA sono al secondo posto  con una produzione di energia totale pari a 4'391'764.011 GW/h  con un aumento in confronto al 2015 di soli 74'605.010 GW/h, nonostante abbia la stessa percentuale di crescita delle rinnovabili della Cina...
+I principali canali in cui si muoveranno gli USA sono completare lo sfruttamento dell'idroelettrico che attualmente ha un valore inferiore a quello canadese e l'aumento dell'utilizzo del eolico e del solare, grazie ad aziende come la più famosa Tesla il mercato delle rinnovabili a casa di tutti gli statunitensi sta aumentando.
+
+
+
+```{r echo=FALSE}
+#USA 
+ele %>%
+  filter(Country == "United States of America"&Year == "2015") %>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>%
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="USA 2015", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Blues",
+          fontsize.labels = 10,
+          fontsize.title = 15
+            )
+
+ele %>%
+  filter(Country == "United States of America"&Year == "2019")%>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>%
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="USA 2019", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Blues",
+          fontsize.labels = 10,
+          fontsize.title = 15
+            )
+
+```
+
+## Uno sguardo più specifico sull'India<br>
+L'India è al terzo posto con una produzione di energia totale pari a 1'591'123.153 GW/h con un aumento in confronto al 2015 di 296'587.944 GW/h che per fare un confronto è circa la produzione totale dell'italia nel 2019.
+<br>
+Con il piano di rilancio dell'india di molte aziende come Reliance presto aumenterà la sua produzione energetica per sostenere anche l'aumento importante di nuovi utenti connessi ad internet dovuti  per  grande parte al JIO, un piano di Reliance per acquisire più clienti grazie ai prezzi più abbordabili.
+
+
+
+
+```{r echo=FALSE}
+#INDIA 
+ele %>%
+  filter(Country == "India"&Year == "2015") %>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>%
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="INDIA 2015", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Purples",
+          fontsize.labels = 10,
+          fontsize.title = 15
+            )
+
+ele %>%
+  filter(Country == "India"&Year == "2019")%>% 
+  select(Country,Technology,Electricity) %>% 
+  group_by(Technology) %>% 
+  summarise(Total=sum(Electricity)) %>% 
+  mutate(Percent=round((Total/sum(Total))*100, 2), nsmall = 2) %>% 
+  mutate(TC=paste(Percent, Technology, sep ="% " ))%>%
+  treemap(
+          index="TC",
+          vSize="Percent",
+          type="index",
+          title="INDIA 2019", 
+          overlap.labels=0.2,
+          inflate.labels=TRUE ,
+          palette ="Purples",
+          fontsize.labels = 10,
+          fontsize.title = 15
+            )
+
+
+
+```
+
+
+## Qual è la fonte energetica che è cresciuta di più?
+
+In questo treemap la dimensione delle celle è la quantità di GW/h nel 2019 mentre la colorazione indica la crescita dal 2015.<br>
+Come già visto nei precedenti grafici e in questo treemap, la tecnologia che porta avanti la produzione mondiale è ancora il combustibile fossile con addirittura una crescita nello sfruttamento di esso, tuttavia vi è una notevole crescita dell'eolico su terra e una discreta sia del solare che dell'idroelettrico.
+
+```{r echo=FALSE}
+#Totale 2019 e 2015
+eletotale2019 <- ele %>%
+  filter(Year == "2019") %>% 
+  ungroup() %>%
+  group_by(Technology) %>%
+  select(Technology,Electricity)%>%
+  summarise(Electricity = sum(Electricity))%>%
+  arrange(desc(Electricity))
+
+eletotale2015 <- ele %>%
+  filter(Year == "2015") %>% 
+  ungroup() %>%
+  group_by(Technology) %>%
+  select(Technology,Electricity)%>%
+  summarise(Electricity = sum(Electricity))%>%
+  arrange(desc(Electricity))
+
+
+
+eletotale2019<-mutate(
+  eletotale2019,
+  diffe1915 = eletotale2019[,2 ]-eletotale2015[,2 ],
+)
+treemap(
+   eletotale2019 ,
+   index="Technology",
+   vSize="Electricity",
+   vColor="diffe1915",
+   type="value",
+   fontsize.title=20,
+   fontsize.labels=20,
+   title="Crescita delle tecnologie",
+   title.legend="Crescita",
+ palette="Spectral"
+)
+```
+
+
+## Conclusioni
+#### Come si prospetta il futuro?
+Ad analisi conclusa è intuibile che la crescita delle rinnovabili è una cosa reale ma molto contenuta in proporzione al fenomeno mediatico degli ultimi anni che ha smosso una larga parte del mondo mentre non ha minimamente toccato alcuni paesi, come per esempio i paesi arabi/nord africani presumibilmente per motivi legati al petrolio ed al business attorno ad esso.<br>
+Tuttavia sia per motivi economici che grazie ad enti regolatori mondiali il trend anche in questi paesi si sta invertendendo e vengono stabilite delle date per traguardi sulle rinnovabili.<br>
+Nonostante nel mondo la situazione sia migliorata leggermente chi davvero muove l'ago della bilancia sono i paesi con una grande produzione elettrica come la Cina, gli USA e l'India del futuro.
+<br>
+Nonostante questi presupposti da qualche parte bisogna pur iniziare, sicuramente grazie agli ultimi incontri per l'ambiente si sono fatte tante promesse, in futuro vedremo quante di esse verranno realizzate o quanto meno posticipate.
+
+
+
+#### Bibliografia e riferimenti
+Fonte dataset: http://pxweb.irena.org/pxweb/en/IRENASTAT/
