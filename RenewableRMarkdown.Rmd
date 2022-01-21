@@ -143,7 +143,7 @@ ele2015<-mutate(
 
 ## La situazione attuale
 Nella mappa con la percentuale di rinnovabili saltano subito all'occhio il Brasile, la Norvegia, la Svezia e il Canada, queste alte percentuali sono dovute allo sfruttamento dell'energia idroelettrica.<br>
-I altri paesi con un'alta percentuale hanno valori di produzione totale bassa quindi non pesano molto, infatti nella seconda mappa hanno poco valore.<br>
+Gli altri paesi con un'alta percentuale hanno valori di produzione di energia totale bassa quindi non impattano molto, infatti nella seconda mappa hanno poco valore.<br>
 ```{r include=FALSE}
 
 
@@ -361,8 +361,8 @@ ggplot(ele %>% filter(Electricity>10000 & Year=="2019" & any(Country==big)), aes
 ```
   
 ## Uno sguardo più specifico sulla Cina<br>
-La Cina è in testa alla classifica del 2019 con una produzione di energia totale pari a 7'504'486.752 GW/h con un aumento in confronto al 2015 di 1'693'134.970 GW/h che per fare un confronto è circa la produzione totale dell'india nel 2019.
-Nel futuro si prospetta un aumento dei consumi non solo industriale ma anche della popolazione cinese, con l'avvenuta delle macchine elettriche grazie anche al successo della azienda locale NIO, infatti la Cina ha dichiarato più volte di voler aumentare la produzione in tutti i settori energetici.
+La Cina è in testa alla classifica del 2019 con una produzione di energia totale pari a 7'504'486.752 GW/h con un aumento in confronto al 2015 di 1'693'134.970 GW/h che è circa la produzione totale dell'india nel 2019.
+Nel futuro si prospetta un aumento dei consumi non solo industriale ma anche della popolazione cinese, con l'avvenuta delle macchine elettriche grazie anche al successo delle azienda locali come per esempio NIO, infatti la Cina ha dichiarato più volte di voler aumentare la produzione in tutti i settori energetici.
 
 
 ```{r echo=FALSE}
@@ -412,8 +412,8 @@ ele %>%
 
 
 ## Uno sguardo più specifico sugli USA <br>
-Gli USA sono al secondo posto  con una produzione di energia totale pari a 4'391'764.011 GW/h  con un aumento in confronto al 2015 di soli 74'605.010 GW/h, nonostante abbia la stessa percentuale di crescita delle rinnovabili della Cina...
-I principali canali in cui si muoveranno gli USA sono completare lo sfruttamento dell'idroelettrico che attualmente ha un valore inferiore a quello canadese e l'aumento dell'utilizzo del eolico e del solare, grazie ad aziende come la più famosa Tesla il mercato delle rinnovabili a casa di tutti gli statunitensi sta aumentando.
+Gli USA sono al secondo posto  con una produzione di energia totale pari a 4'391'764.011 GW/h  con un aumento in confronto al 2015 di soli 74'605.010 GW/h, nonostante ciò ha la stessa percentuale di crescita delle rinnovabili della Cina...
+I principali canali in cui si muoveranno gli USA in futuro sono completare lo sfruttamento dell'idroelettrico che attualmente ha un valore inferiore a quello canadese e l'aumento dell'utilizzo dell'eolico e del solare, grazie anche ad aziende come la più famosa Tesla il mercato delle rinnovabili a casa di tutti gli statunitensi sta aumentando.
 
 
 
@@ -460,9 +460,9 @@ ele %>%
 ```
 
 ## Uno sguardo più specifico sull'India<br>
-L'India è al terzo posto con una produzione di energia totale pari a 1'591'123.153 GW/h con un aumento in confronto al 2015 di 296'587.944 GW/h che per fare un confronto è circa la produzione totale dell'italia nel 2019.
+L'India è al terzo posto con una produzione di energia totale pari a 1'591'123.153 GW/h con un aumento in confronto al 2015 di 296'587.944 GW/h che  è circa la produzione totale dell'Italia nel 2019.
 <br>
-Con il piano di rilancio dell'india di molte aziende come Reliance presto aumenterà la sua produzione energetica per sostenere anche l'aumento importante di nuovi utenti connessi ad internet dovuti  per  grande parte al JIO, un piano di Reliance per acquisire più clienti grazie ai prezzi più abbordabili.
+Con il piano di rilancio dell'India di molte aziende come Reliance presto aumenterà la sua produzione energetica per sostenere anche l'aumento importante di nuovi utenti connessi ad internet dovuti  per  grande parte al JIO, un piano di Reliance per acquisire più clienti grazie ai prezzi più abbordabili.
 
 
 
@@ -515,7 +515,7 @@ ele %>%
 ## Qual è la fonte energetica che è cresciuta di più?
 
 In questo treemap la dimensione delle celle è la quantità di GW/h nel 2019 mentre la colorazione indica la crescita dal 2015.<br>
-Come già visto nei precedenti grafici e in questo treemap, la tecnologia che porta avanti la produzione mondiale è ancora il combustibile fossile con addirittura una crescita nello sfruttamento di esso, tuttavia vi è una notevole crescita dell'eolico su terra e una discreta sia del solare che dell'idroelettrico.
+Come già visto nei precedenti grafici e in questo treemap, la tecnologia che porta avanti la produzione mondiale è ancora il combustibile fossile con addirittura una crescita dello sfruttamento di esso, tuttavia vi è una notevole crescita dell'eolico su terra e una discreta sia del solare che dell'idroelettrico.
 
 ```{r echo=FALSE}
 #Totale 2019 e 2015
@@ -560,7 +560,7 @@ treemap(
 #### Come si prospetta il futuro?
 Ad analisi conclusa è intuibile che la crescita delle rinnovabili è una cosa reale ma molto contenuta in proporzione al fenomeno mediatico degli ultimi anni che ha smosso una larga parte del mondo mentre non ha minimamente toccato alcuni paesi, come per esempio i paesi arabi/nord africani presumibilmente per motivi legati al petrolio ed al business attorno ad esso.<br>
 Tuttavia sia per motivi economici che grazie ad enti regolatori mondiali il trend anche in questi paesi si sta invertendendo e vengono stabilite delle date per traguardi sulle rinnovabili.<br>
-Nonostante nel mondo la situazione sia migliorata leggermente chi davvero muove l'ago della bilancia sono i paesi con una grande produzione elettrica come la Cina, gli USA e l'India del futuro.
+Nonostante nel mondo la situazione sia migliorata leggermente, chi davvero muove l'ago della bilancia sono i paesi con una grande produzione elettrica come la Cina, gli USA e l'India del futuro.
 <br>
 Nonostante questi presupposti da qualche parte bisogna pur iniziare, sicuramente grazie agli ultimi incontri per l'ambiente si sono fatte tante promesse, in futuro vedremo quante di esse verranno realizzate o quanto meno posticipate.
 
